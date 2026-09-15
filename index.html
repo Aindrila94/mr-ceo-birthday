@@ -6,11 +6,16 @@
 <title>Mr. CEO — Birthday Candle</title>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:
-radial-gradient(circle at 50% 25%,#54212d 0,#1b0b11 38%,#090509 78%);
+*{box-sizing:border-box}body{margin:0;min-height:100vh;position:relative;overflow:hidden;
+background:#120914 url('birthday-background.png') center center/cover no-repeat fixed;
 color:#f8e8e1;font-family:Georgia,serif;display:flex;justify-content:center;align-items:center;padding:24px}
+body:before{content:"";position:absolute;inset:0;pointer-events:none;
+background:linear-gradient(180deg,rgba(8,5,12,.10),rgba(8,5,12,.28));}
+body:after{content:"";position:absolute;inset:0;pointer-events:none;
+background:radial-gradient(circle at 50% 45%,transparent 25%,rgba(5,3,8,.20) 100%);}
 .wrap{width:min(720px,100%);text-align:center}.card{padding:38px 26px 42px;border:1px solid #7d4c55;
-border-radius:30px;background:rgba(27,11,17,.88);box-shadow:0 25px 80px #0009}
+border-radius:30px;background:linear-gradient(145deg,rgba(25,12,22,.64),rgba(9,8,18,.62));
+box-shadow:0 25px 80px #0009}
 .kicker{font:12px Arial,sans-serif;letter-spacing:.28em;color:#cda6a0}.name{font-size:clamp(40px,9vw,72px);font-style:italic;margin:8px 0}
 .lead{color:#ddc8c2;line-height:1.7;font-size:17px}.room{font:14px Arial,sans-serif;color:#c9aaa5;margin:14px 0}
 input{font-size:18px;text-align:center;padding:13px;border-radius:12px;border:1px solid #7d4c55;background:#14090d;color:#fff;width:190px}
@@ -59,7 +64,17 @@ function extinguish(remote=false){
 $("candle").classList.add("off");
 $("message").innerHTML="Wish made. ❤️<br><i>Happy Birthday, Mr. CEO.</i><br>May this year be ridiculously good to you.";
 $("controls").innerHTML='<button id="again">Light the candle again</button>';
-for(let i=0;i<55;i++){let s=document.createElement("span");s.style.cssText=`position:fixed;left:${Math.random()*100}%;top:-15px;width:7px;height:13px;background:${["#e9b8ad","#f4d8cf","#d58c8b","#fff1ba"][i%4]};animation:fall 2.4s linear ${Math.random()*.5}s forwards;`;document.body.appendChild(s);setTimeout(()=>s.remove(),3200)}
+for(let i=0;i<65;i++){
+let s=document.createElement("span");
+const heart = i % 4 === 0;
+s.textContent = heart ? "♥" : "";
+const size = heart ? (12 + Math.random()*9) : 7;
+const palette = heart ? ["#e95d73","#f28aa0","#d94f68","#ffd0d8"] : ["#e9b8ad","#f4d8cf","#d58c8b","#fff1ba"];
+s.style.cssText=`position:fixed;left:${Math.random()*100}%;top:-25px;width:${heart?size:7}px;height:${heart?size:13}px;
+color:${heart?palette[i%palette.length]:"transparent"};background:${heart?"transparent":palette[i%palette.length]};
+font-size:${size}px;line-height:1;animation:fall 2.4s linear ${Math.random()*.5}s forwards;
+transform:rotate(${Math.random()*50-25}deg);text-shadow:${heart?"0 2px 8px rgba(220,70,90,.35)":"none"};`;
+document.body.appendChild(s);setTimeout(()=>s.remove(),3200)}
 if(conn&&isHost)conn.send({type:"off"});
 $("again").onclick=()=>{ $("candle").classList.remove("off");$("message").textContent="Make a wish… and blow when you're ready. ♡";$("controls").innerHTML=isHost?'<button class="danger" id="off">🕯️ Extinguish the candle</button>':'';if(conn&&isHost)conn.send({type:"on"});if(isHost)$("off").onclick=()=>extinguish()};
 }
