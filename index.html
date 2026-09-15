@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mr. CEO — Birthday Candle</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:
+radial-gradient(circle at 50% 25%,#54212d 0,#1b0b11 38%,#090509 78%);
+color:#f8e8e1;font-family:Georgia,serif;display:flex;justify-content:center;align-items:center;padding:24px}
+.wrap{width:min(720px,100%);text-align:center}.card{padding:38px 26px 42px;border:1px solid #7d4c55;
+border-radius:30px;background:rgba(27,11,17,.88);box-shadow:0 25px 80px #0009}
+.kicker{font:12px Arial,sans-serif;letter-spacing:.28em;color:#cda6a0}.name{font-size:clamp(40px,9vw,72px);font-style:italic;margin:8px 0}
+.lead{color:#ddc8c2;line-height:1.7;font-size:17px}.room{font:14px Arial,sans-serif;color:#c9aaa5;margin:14px 0}
+input{font-size:18px;text-align:center;padding:13px;border-radius:12px;border:1px solid #7d4c55;background:#14090d;color:#fff;width:190px}
+button{font:16px Georgia,serif;color:#fff4ef;background:linear-gradient(135deg,#7a3542,#401923);
+border:1px solid #b97983;border-radius:999px;padding:14px 24px;cursor:pointer;margin:8px;min-height:48px}
+button:disabled{opacity:.4;cursor:not-allowed}.candle{height:260px;position:relative;margin:10px auto}
+.plate{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);width:250px;height:28px;border-radius:50%;background:#d8c3bb;box-shadow:0 6px #75534d}
+.cake{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);width:190px;height:105px;border-radius:20px 20px 30px 30px;background:linear-gradient(#6d3029,#321512);box-shadow:inset 0 -18px #24100f}
+.frost{position:absolute;top:-9px;width:190px;height:35px;border-radius:50%;background:#e8c9c0}
+.stick{position:absolute;bottom:135px;left:50%;transform:translateX(-50%);width:16px;height:80px;border-radius:6px;background:repeating-linear-gradient(135deg,#fff0e8 0 8px,#d49a91 8px 13px)}
+.flame{position:absolute;bottom:209px;left:50%;margin-left:-15px;width:30px;height:48px;border-radius:55% 45% 55% 45%;
+background:radial-gradient(circle at 50% 68%,#fff8bb 0 20%,#ffc15d 38%,#ed6542 70%,transparent 72%);
+filter:drop-shadow(0 0 14px #ffb45f);animation:f .12s infinite alternate}
+@keyframes f{to{transform:scale(.9,1.08) rotate(2deg)}}.off .flame{display:none}
+.smoke{display:none}.off .smoke{display:block;position:absolute;bottom:205px;left:50%;width:12px;height:12px;border-radius:50%;background:#7778;filter:blur(3px);animation:s 1.8s ease-out forwards}
+@keyframes s{to{transform:translate(-10px,-65px) scale(2.5);opacity:0}}
+.hidden{display:none}.msg{font-size:24px;line-height:1.7;margin:12px auto 24px;color:#f1d5cc}.status{font:13px Arial,sans-serif;color:#bda19c;min-height:20px}
+.note{font:12px Arial,sans-serif;color:#8f7370;margin-top:12px}.danger{background:linear-gradient(135deg,#9a3e4e,#581c2a);border-color:#d78b95}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<div class="kicker">A LITTLE BIRTHDAY SURPRISE FOR</div>
+<div class="name">Mr. CEO ♡</div>
+<p class="lead">One candle. One wish.<br>Close your eyes and make it count.</p>
+<div id="joinBox">
+<button id="hostBtn">I'm the birthday sender</button>
+<div><input id="roomInput" maxlength="8" placeholder="Room code"></div>
+<button id="joinBtn">I'm Mr. CEO</button>
+<div class="note">For the two-browser version, both people need to open this same page.</div>
+</div>
+<div id="game" class="hidden">
+<div class="room" id="room"></div>
+<div class="candle" id="candle"><div class="plate"></div><div class="cake"><div class="frost"></div></div>
+<div class="stick"></div><div class="flame"></div><div class="smoke"></div></div>
+<div id="message" class="msg">Make a wish… and blow when you're ready. ♡</div>
+<div id="controls"></div><div class="status" id="status"></div>
+</div>
+</div></div>
+<script>
+const $=id=>document.getElementById(id), hostBtn=$("hostBtn"),joinBtn=$("joinBtn"),input=$("roomInput");
+let peer=null,conn=null,isHost=false,roomId="";
+function showGame(){ $("joinBox").classList.add("hidden"); $("game").classList.remove("hidden"); }
+function randomCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
+function extinguish(remote=false){
+$("candle").classList.add("off");
+$("message").innerHTML="Wish made. ❤️<br><i>Happy Birthday, Mr. CEO.</i><br>May this year be ridiculously good to you.";
+$("controls").innerHTML='<button id="again">Light the candle again</button>';
+for(let i=0;i<55;i++){let s=document.createElement("span");s.style.cssText=`position:fixed;left:${Math.random()*100}%;top:-15px;width:7px;height:13px;background:${["#e9b8ad","#f4d8cf","#d58c8b","#fff1ba"][i%4]};animation:fall 2.4s linear ${Math.random()*.5}s forwards;`;document.body.appendChild(s);setTimeout(()=>s.remove(),3200)}
+if(conn&&isHost)conn.send({type:"off"});
+$("again").onclick=()=>{ $("candle").classList.remove("off");$("message").textContent="Make a wish… and blow when you're ready. ♡";$("controls").innerHTML=isHost?'<button class="danger" id="off">🕯️ Extinguish the candle</button>':'';if(conn&&isHost)conn.send({type:"on"});if(isHost)$("off").onclick=()=>extinguish()};
+}
+function ready(){showGame();$("room").textContent="Room: "+roomId;if(isHost){$("message").textContent="You're in control. Wait for him to make his wish."; $("controls").innerHTML='<button class="danger" id="off">🕯️ Extinguish the candle</button>';$("off").onclick=()=>extinguish()}else{$("controls").innerHTML="";}}
+hostBtn.onclick=()=>{isHost=true;roomId=randomCode();peer=new Peer(roomId);peer.on("open",()=>{$("room").textContent="Send this room code to Mr. CEO: "+roomId;ready();$("room").textContent="Send Mr. CEO this room code: "+roomId});peer.on("connection",c=>{conn=c;conn.on("open",()=>{$("status").textContent="Mr. CEO is connected ❤️";});conn.on("data",d=>{if(d.type==="on"){$("candle").classList.remove("off");$("message").textContent="Make a wish… and blow when you're ready. ♡"}})});};
+joinBtn.onclick=()=>{roomId=input.value.trim().toUpperCase();if(!/^[A-Z0-9]{4,8}$/.test(roomId)){alert("Enter the room code.");return}peer=new Peer();peer.on("open",()=>{conn=peer.connect(roomId);conn.on("open",()=>{ready();$("status").textContent="Connected. Make your wish. ♡"});conn.on("data",d=>{if(d.type==="off")extinguish();if(d.type==="on"){$("candle").classList.remove("off");$("message").textContent="Make a wish… and blow when you're ready. ♡"}})});};
+const st=document.createElement("style");st.textContent="@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}";document.head.appendChild(st);
+</script>
+</body>
+</html>
